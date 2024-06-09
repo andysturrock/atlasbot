@@ -1,0 +1,70 @@
+modules:
+  confluence:contentBylineItem:
+    - key: atlasbot-content-byline-item
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: atlasbot
+  function:
+    - key: resolver
+      handler: index.handler
+      providers:
+        auth:
+          - slack
+
+resources:
+  - key: main
+    path: src/frontend/index.tsx
+
+app:
+  runtime:
+    name: nodejs18.x
+  id: __FORGE_ID__
+
+permissions:
+  scopes:
+    - read:page:confluence
+  external:
+    fetch:
+      backend:
+        - remote: atlasbot-api
+        - remote: slack-com
+
+providers:
+  auth:
+    - key: slack
+      name: Slack
+      scopes:
+        - 'openid'
+        - 'email'
+        - 'profile'
+      type: oauth2
+      clientId: '__SLACK_CLIENT_ID__'
+      remotes:
+        - slack-com
+        - atlasbot-api
+      bearerMethod: authorization-header
+      actions:
+        authorization:
+          remote: slack-com
+          path: /openid/connect/authorize
+          queryParameters:
+            user_scope: 'users.profile:read,chat:write,channels:history,channels:read'
+        exchange:
+          remote: slack-com
+          path: /api/openid.connect.token
+        retrieveProfile:
+          remote: slack-com
+          path: /api/openid.connect.userInfo
+          resolvers:
+            id: sub
+            displayName: name
+            avatarUrl: picture
+
+remotes:
+  - key: atlasbot-api
+    baseUrl: __ATLASBOT_BASE_URL__
+  - key: slack-com
+    baseUrl: https://slack.com
+
