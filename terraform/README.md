@@ -6,6 +6,7 @@ Terraform needs the following roles and permissions to run in the identity proje
 ```
 roles/Service Usage Admin
 iam.roles.create
+iam.roles.delete
 iam.roles.get
 iam.roles.update
 iam.serviceAccounts.get
@@ -23,6 +24,7 @@ Terraform needs the following roles and permissions to run in the gemini project
 ```
 roles/Service Usage Admin
 iam.roles.create
+iam.roles.delete
 iam.roles.get
 iam.roles.update
 iam.serviceAccounts.get
@@ -30,3 +32,6 @@ resourcemanager.projects.get
 resourcemanager.projects.getIamPolicy
 resourcemanager.projects.setIamPolicy
 ```
+
+### TODO
+Need to manually download the ADC file from the workload identity pool to package with the AWS lambda.  This could probably be automated using the GCP CLI.
