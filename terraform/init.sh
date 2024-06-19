@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Script to set up workspace so can have multiple environments.
+#
+
 set -eo pipefail
 
 echo "Loading env vars from .env"
@@ -14,5 +18,3 @@ sed -e "s|__TF_ORG__|$TF_ORG|g" \
 ../manifests/cloud.tf > ./cloud.tf
 
 terraform init
-
-terraform apply
