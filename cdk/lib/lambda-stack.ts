@@ -55,6 +55,21 @@ export class LambdaStack extends Stack {
     // Allow read access to the secret it needs
     props.atlasBotSecret.grantRead(handleAtlassianWebhookLambda);
 
+    // Lambda for authorizing the calls from Atlassian
+    const handleAtlassianWebhookAuthorizerLambda = new lambda.Function(this, "handleAtlassianWebhookAuthorizerLambda", {
+      handler: "handleAtlassianWebhookAuthorizer.handleAtlassianWebhookAuthorizer",
+      functionName: 'atlasBot-handleAtlassianWebhookAuthorizer',
+      code: lambda.Code.fromAsset("../lambda-src/dist/handleAtlassianWebhookAuthorizer"),
+      memorySize: 512,
+      ...allLambdaProps
+    });
+    const handleAtlassianWebhookAuthorizer = new apigateway.RequestAuthorizer(this, 'handleAtlassianWebhookAuthorizer', {
+      handler: handleAtlassianWebhookAuthorizerLambda,
+      authorizerName: 'handleAtlassianWebhookAuthorizer',
+      resultsCacheTtl: Duration.seconds(0),
+      identitySources: ["method.request.header.Authorization"]
+    });
+
     // Get hold of the hosted zone which has previously been created
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, 'R53Zone', {
       zoneName: props.customDomainName,
@@ -109,7 +124,9 @@ export class LambdaStack extends Stack {
     const handleAtlassianWebhookResource = api.root.addResource('atlas-webhook');
     // And add the methods.
     handleSlackAuthRedirectResource.addMethod("GET", handleSlackAuthRedirectLambdaIntegration);
-    handleAtlassianWebhookResource.addMethod("POST", handleAtlassianWebhookLambdaIntegration);
+    handleAtlassianWebhookResource.addMethod("POST", handleAtlassianWebhookLambdaIntegration, {
+      authorizer: handleAtlassianWebhookAuthorizer
+    });
     
 
     // Create the R53 "A" record to map from the custom domain to the actual API URL

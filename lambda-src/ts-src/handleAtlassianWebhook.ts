@@ -1,6 +1,6 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {GenerateContentRequest, GenerateContentResponse, GenerativeModel, VertexAI} from '@google-cloud/vertexai';
-import {validateUserToken, postMessage} from './slackAPI';
+import {postMessage} from './slackAPI';
 import {KnownBlock, RichTextBlock, SectionBlock} from '@slack/bolt';
 import {getSecretValue} from './awsAPI';
 
@@ -78,15 +78,6 @@ function extractContent(content: Content) {
 
 export async function handleAtlassianWebhook(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
-    const authorization = event.headers["authorization"] || event.headers["Authorization"];
-    if(!authorization) {
-      throw new Error("Missing authorization header");
-    }
-    const token = authorization.replace('Bearer ', '');
-    const slackUserId = await validateUserToken(token);
-    if(!slackUserId) {
-      throw new Error("Invalid token from Slack auth.");
-    }
     if(!event.body) {
       throw new Error("Missing event body");
     }
@@ -96,9 +87,6 @@ export async function handleAtlassianWebhook(event: APIGatewayProxyEvent): Promi
       pageContent: Body
     };
     const body = JSON.parse(event.body) as EventBody;
-    if(slackUserId != body.slackUserId) {
-      throw new Error(`Slack token is for incorrect user.  Event contained ${body.slackUserId}, token was for ${slackUserId}`);
-    }
 
     const extractedContent = extractContent(body.pageContent.content);
 
@@ -136,7 +124,7 @@ export async function handleAtlassianWebhook(event: APIGatewayProxyEvent): Promi
     };
     blocks.push(sectionBlock);
     blocks.push(richTextBlock);
-    await postMessage(slackUserId, `Summary of ${body.pageUrl}`, blocks);
+    await postMessage(body.slackUserId, `Summary of ${body.pageUrl}`, blocks);
     
     const result: APIGatewayProxyResult = {
       body: "OK",

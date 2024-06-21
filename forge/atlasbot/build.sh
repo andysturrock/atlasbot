@@ -16,7 +16,12 @@ sed -e "s|__FORGE_ID__|$FORGE_ID|g" \
 echo "Deploying to Forge environment \"${FORGE_ENVIRONMENT}\"..."
 forge deploy --environment ${FORGE_ENVIRONMENT} 
 echo "Installing to Forge environment \"${FORGE_ENVIRONMENT}\"..."
+
+# For first time install to each environment
+#forge install --environment ${FORGE_ENVIRONMENT} --site ${SITE} --product Confluence --non-interactive
+# All subsequent times
 forge install --upgrade --environment ${FORGE_ENVIRONMENT} --site ${SITE} --product Confluence --non-interactive
+
 echo "Setting variables in Forge environment \"${FORGE_ENVIRONMENT}\"..."
 forge variables set --environment ${FORGE_ENVIRONMENT} ATLASBOT_WEBHOOK_PATH ${ATLASBOT_WEBHOOK_PATH}
 

@@ -13,6 +13,7 @@ echo "Typechecking files..."
 lambdas=" \
  handleSlackAuthRedirect \
  handleAtlassianWebhook \
+ handleAtlassianWebhookAuthorizer \
  "
 
 for lambda in ${lambdas}

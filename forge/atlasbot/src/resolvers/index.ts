@@ -1,6 +1,5 @@
 import Resolver from '@forge/resolver';
 import api, { route } from '@forge/api';
-import util from 'util';
 import inspect from 'browser-util-inspect';
 
 // From @forge/resolver which unfortunately doesn't export these types
@@ -33,6 +32,9 @@ async function summarise(request: Request) {
   const confluenceAPIResult = await api.asUser().requestConfluence(route`/wiki/api/v2/pages/${pageId}?body-format=atlas_doc_format`);
 
   const json = await confluenceAPIResult.json();
+  if(!json.body || !json.body.atlas_doc_format || !json.body.atlas_doc_format.value) {
+    throw new Error(`Could not get contents of Confluence page from:\n${inspect(json, false, null)}`);
+  }
   const pageContent = JSON.parse(json.body.atlas_doc_format.value as string);
   const webui = json._links.webui as string;
   const base = json._links.base as string;
@@ -48,13 +50,20 @@ async function summarise(request: Request) {
   };
   const options = {
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    // Header convention seems to be lowercase with - as separator.
+    headers: {'slack-user-id': account.id}
   };
   try {
     // TODO - should be using this but it won't allow any paths with a / in them.
     // await atlasBotAPI.fetch(route`${atlasWebhookPath}`, options);
     // So just use the raw string instead, assuming the user has set the env var value safely.
-    await atlasBotAPI.fetch(atlasWebhookPath, options);
+    const apiResponse = await atlasBotAPI.fetch(atlasWebhookPath, options);
+    const ok = apiResponse.ok;
+    const status = apiResponse.status;
+    if(!ok || status != 200) {
+      console.warn(`Call to API returned ok: ${ok} and status ${status}`);
+    }
   }
   catch(error) {
     console.error(error);
