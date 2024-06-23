@@ -25,6 +25,7 @@ app:
 permissions:
   scopes:
     - read:page:confluence
+    - write:page:confluence
   external:
     fetch:
       backend:

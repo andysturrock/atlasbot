@@ -34,13 +34,13 @@ export async function handleSlackAuthRedirect(event: APIGatewayProxyEvent): Prom
     type SlackResponse = {
       ok: boolean,
       app_id: string,
-      authed_user: { id: string },
+      authed_user: {id: string},
       scope: string,
       token_type: string,
       access_token: string,
       bot_user_id: string,
-      team?: { id: string, name: string },
-      enterprise?: { id: string, name: string },
+      team?: {id: string, name: string},
+      enterprise?: {id: string, name: string},
       is_enterprise_install: boolean,
       error?: string
     };

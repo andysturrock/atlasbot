@@ -1,12 +1,10 @@
-import 'source-map-support/register';
 import {APIGatewayAuthorizerResult, APIGatewayRequestAuthorizerEvent} from 'aws-lambda';
+import 'source-map-support/register';
 import {generatePolicy} from './authorization';
-import util from 'util';
 import {validateUserToken} from './slackAPI';
 
 export async function handleAtlassianWebhookAuthorizer(event: APIGatewayRequestAuthorizerEvent): Promise<APIGatewayAuthorizerResult> {
   try {
-    console.log(`\n\n\nevent:\n\n\n${util.inspect(event, false, null)}`);
     if(event.headers) {
       // Seems to sometimes have uppercase A, sometimes not.
       let token = event.headers["authorization"]?.replace('Bearer ', '');

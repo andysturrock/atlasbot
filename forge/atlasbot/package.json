@@ -9,16 +9,15 @@
   },
   "devDependencies": {
     "@types/browser-util-inspect": "^0.2.4",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0"
   },
   "dependencies": {
     "@forge/bridge": "3.4.0",
-    "@forge/react": "10.1.1",
-    "@forge/resolver": "1.5.33",
-    "@forge/ui": "^1.11.1",
+    "@forge/react": "10.2.0",
+    "@forge/resolver": "1.5.34",
     "browser-util-inspect": "^0.2.0",
     "react": "^18.2.0"
   }

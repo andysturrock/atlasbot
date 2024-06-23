@@ -1,8 +1,8 @@
-import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {GenerateContentRequest, GenerateContentResponse, GenerativeModel, VertexAI} from '@google-cloud/vertexai';
-import {postMessage} from './slackAPI';
 import {KnownBlock, RichTextBlock, SectionBlock} from '@slack/bolt';
+import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {getSecretValue} from './awsAPI';
+import {postMessage} from './slackAPI';
 
 type CodeBlock = {
   type: 'codeBlock',
@@ -84,7 +84,8 @@ export async function handleAtlassianWebhook(event: APIGatewayProxyEvent): Promi
     type EventBody = {
       slackUserId: string,
       pageUrl: string,
-      pageContent: Body
+      pageContent: Body,
+      sendToSlack: boolean
     };
     const body = JSON.parse(event.body) as EventBody;
 
@@ -100,34 +101,36 @@ export async function handleAtlassianWebhook(event: APIGatewayProxyEvent): Promi
     });
     const summary = await generateSummary(generativeModel, extractedContent);
 
-    const blocks: KnownBlock[] = [];
-    const sectionBlock: SectionBlock = {
-      type: 'section',
-      text: {
-        type: "mrkdwn",
-        text: `Summary of ${body.pageUrl}`
-      }
-    };
-    const richTextBlock: RichTextBlock = {
-      type: 'rich_text',
-      elements: [
-        {
-          type: "rich_text_quote",
-          elements: [
-            {
-              type: "text",
-              text: summary
-            }
-          ]
+    if(body.sendToSlack) {
+      const blocks: KnownBlock[] = [];
+      const sectionBlock: SectionBlock = {
+        type: 'section',
+        text: {
+          type: "mrkdwn",
+          text: `Summary of ${body.pageUrl}`
         }
-      ]
-    };
-    blocks.push(sectionBlock);
-    blocks.push(richTextBlock);
-    await postMessage(body.slackUserId, `Summary of ${body.pageUrl}`, blocks);
+      };
+      const richTextBlock: RichTextBlock = {
+        type: 'rich_text',
+        elements: [
+          {
+            type: "rich_text_quote",
+            elements: [
+              {
+                type: "text",
+                text: summary
+              }
+            ]
+          }
+        ]
+      };
+      blocks.push(sectionBlock);
+      blocks.push(richTextBlock);
+      await postMessage(body.slackUserId, `Summary of ${body.pageUrl}`, blocks);
+    }
     
     const result: APIGatewayProxyResult = {
-      body: "OK",
+      body: JSON.stringify({summary}),
       statusCode: 200
     };
 

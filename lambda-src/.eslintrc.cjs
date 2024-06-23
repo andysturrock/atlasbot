@@ -11,9 +11,6 @@ module.exports = {
     tsconfigRootDir: __dirname,
   },
   root: true,
-  // rules: {
-  //   "semicolon": [true, "always"],
-  // }
   "rules": {
     "indent": [
       "error",
@@ -56,7 +53,8 @@ module.exports = {
         }
       }
     ],
-    "object-curly-spacing": [
+    "object-curly-spacing": "off",
+    "@typescript-eslint/object-curly-spacing": [
       "error",
       "never"
     ]
