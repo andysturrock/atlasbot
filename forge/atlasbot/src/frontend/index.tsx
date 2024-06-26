@@ -11,7 +11,7 @@ function App() {
     if(context) {
       setSummarising(true);
       const pageId = context.extension.content.id;
-      await invoke('summarise', { pageId, sendToSlack: true });
+      await invoke('summarise', { pageId, sendToSlack: true, type: context.extension.content.type });
       setSummarising(false);
     }
     else {
@@ -23,7 +23,7 @@ function App() {
     if(context) {
       setSummarising(true);
       const pageId = context.extension.content.id;
-      const url = await invoke('summarise', { pageId, sendToSlack: false }) as string;
+      const url = await invoke('summarise', { pageId, sendToSlack: false, type: context.extension.content.type }) as string;
       setSummarising(false);
       // Reload the page to show the latest version.
       router.navigate(url);

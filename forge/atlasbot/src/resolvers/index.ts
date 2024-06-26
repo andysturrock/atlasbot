@@ -30,7 +30,12 @@ async function summarise(request: Request) {
 
   const pageId = request.payload.pageId;
   const sendToSlack = request.payload.sendToSlack;
-  let confluenceAPIResult = await api.asUser().requestConfluence(route`/wiki/api/v2/pages/${pageId}?body-format=atlas_doc_format`);
+  const type = request.payload.type;
+  let path = route`/wiki/api/v2/pages/${pageId}?body-format=atlas_doc_format`;
+  if(type == 'blogpost') {
+    path  = route`/wiki/api/v2/blogposts/${pageId}?body-format=atlas_doc_format`;
+  }
+  let confluenceAPIResult = await api.asUser().requestConfluence(path);
 
   // There's more fields than this in reality.
   type Page = {
@@ -53,7 +58,7 @@ async function summarise(request: Request) {
   };
   let page = await confluenceAPIResult.json() as Page;
   if (!page.body || !page.body.atlas_doc_format || !page.body.atlas_doc_format.value) {
-    throw new Error(`Could not get contents of Confluence page from:\n${inspect(page, false, null)}`);
+    throw new Error(`Could not get contents of Confluence page ${path.value}.  Got:\n${inspect(page, false, null)}`);
   }
 
   // Strip out any existing tl;dr section
@@ -163,8 +168,13 @@ async function summarise(request: Request) {
           message: 'tl;dr section added by AtlasBot'
         }
       };
-        
-      confluenceAPIResult = await api.asUser().requestConfluence(route`/wiki/api/v2/pages/${pageId}`, {
+
+      path = route`/wiki/api/v2/pages/${pageId}`;
+      if(type == 'blogpost') {
+        path  = route`/wiki/api/v2/blogposts/${pageId}`;
+      }
+      
+      confluenceAPIResult = await api.asUser().requestConfluence(path, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
