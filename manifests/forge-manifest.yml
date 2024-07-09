@@ -50,8 +50,6 @@ providers:
         authorization:
           remote: slack-com
           path: /openid/connect/authorize
-          queryParameters:
-            user_scope: 'users.profile:read,chat:write,channels:history,channels:read'
         exchange:
           remote: slack-com
           path: /api/openid.connect.token

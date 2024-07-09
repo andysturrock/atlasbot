@@ -1,8 +1,8 @@
-import {WebClient, LogLevel, ViewsOpenArguments} from "@slack/web-api";
-import {getSecretValue} from './awsAPI';
-import {Block, KnownBlock, ModalView} from "@slack/bolt";
-import util from 'util';
+import { Block, KnownBlock, ModalView } from "@slack/bolt";
+import { LogLevel, ViewsOpenArguments, WebClient } from "@slack/web-api";
 import axios from 'axios';
+import util from 'util';
+import { getSecretValue } from './awsAPI';
 
 async function createClient() {
   const slackBotToken = await getSecretValue('AtlasBot', 'slackBotToken');
@@ -12,12 +12,21 @@ async function createClient() {
   });
 }
 
-export async function validateUserToken(token: string) {
+export type SignInWithSlackUserInfo = {
+  userId?: string,
+  enterpriseId?: string
+}
+export async function getSignInWithSlackUserInfo(token: string) {
   const userWebClient = new WebClient(token, {
-    logLevel: LogLevel.INFO
+    logLevel: LogLevel.DEBUG
   });
-  const authTestResponse = await userWebClient.auth.test();
-  return authTestResponse.user_id;
+  const openIDConnectUserInfoResponse = await userWebClient.openid.connect.userInfo();
+  console.log(`openIDConnectUserInfoResponse: ${util.inspect(openIDConnectUserInfoResponse, false, null)}}`)
+  const signInWithSlackUserInfo: SignInWithSlackUserInfo = {
+    userId: openIDConnectUserInfoResponse.sub,
+    enterpriseId: openIDConnectUserInfoResponse["https://slack.com/enterprise_id"]
+  };
+  return signInWithSlackUserInfo;
 }
 
 export async function openView(trigger_id: string, modalView: ModalView) {

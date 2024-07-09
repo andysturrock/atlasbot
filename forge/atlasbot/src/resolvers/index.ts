@@ -72,13 +72,13 @@ async function summarise(request: Request) {
       {
         type: string,
         attrs?: { level: number },
-        content: Text[]
+        content?: Text[]
       }[]
   };
   const atlasDoc = JSON.parse(page.body.atlas_doc_format.value) as AtlasDoc;
   if(atlasDoc.content[0].type == 'heading' && atlasDoc.content[0].content[0].text == 'tl;dr') {
-    // Remove the heading and the following paragraph
-    atlasDoc.content.splice(0, 2);
+    // Remove the heading, the following paragraph and the horizontal divider
+    atlasDoc.content.splice(0, 3);
   }
 
   // Get the Slack provider and request creds if required.
@@ -139,6 +139,11 @@ async function summarise(request: Request) {
           text
         ]
       };
+      // Type "rule" is a horizontal divider
+      const rule =  {
+        type: 'rule'
+      };
+      atlasDoc.content.unshift(rule);
       atlasDoc.content.unshift(paragraph);
       atlasDoc.content.unshift(heading);
 

@@ -40,7 +40,7 @@ function App() {
           Send AI Summary to Slack
         </Button>
         <Button onClick={onInsertSummaryClick} isDisabled={isSummarising}>
-          Insert/Update AI Summary here
+          Insert/Update AI Summary in page
         </Button>
       </Stack>
     </ButtonGroup>
