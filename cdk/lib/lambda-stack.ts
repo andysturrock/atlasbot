@@ -1,13 +1,13 @@
-import {Duration, Stack} from 'aws-cdk-lib';
-import {Construct} from 'constructs';
+import { Duration, Stack } from 'aws-cdk-lib';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import {LambdaStackProps} from './common';
+import { Construct } from 'constructs';
+import { LambdaStackProps } from './common';
 
 export class LambdaStack extends Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
@@ -69,6 +69,8 @@ export class LambdaStack extends Stack {
       resultsCacheTtl: Duration.seconds(0),
       identitySources: ["method.request.header.Authorization"]
     });
+    // Allow read access to the secret it needs
+    props.atlasBotSecret.grantRead(handleAtlassianWebhookAuthorizerLambda);
 
     // Get hold of the hosted zone which has previously been created
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, 'R53Zone', {
